@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "css": "node-sass --output-style expanded --importer=node_modules/node-sass-tilde-importer src/options-page.scss dist/options-page.css",
+    "css-w": "npm run css && npm run css -- --watch",
     "js": "webpack",
-    "js-w": "webpack --watch",
-    "js-prod": "cross-env NODE_ENV=production webpack"
+    "js-w": "npm run js -- --watch",
+    "js-prod": "cross-env NODE_ENV=production npm run js"
   },
   "dependencies": {
     "lodash": "~4.17.15",
+    "webext-base-css": "~1.1.0",
     "webextension-polyfill": "~0.6.0"
   },
   "devDependencies": {
@@ -19,6 +22,8 @@
     "eslint-config-prettier": "~6.11.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "~3.1.3",
+    "node-sass": "~4.14.1",
+    "node-sass-tilde-importer": "~1.0.2",
     "prettier": "~2.0.5",
     "webpack": "~4.43.0",
     "webpack-cli": "~3.3.11"

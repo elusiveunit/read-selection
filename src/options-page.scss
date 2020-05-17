@@ -1,0 +1,36 @@
+@import '~webext-base-css/webext-base';
+
+// Bump specificity for easier overriding
+#opt {
+  padding-top: 10px;
+
+  input,
+  select {
+    display: block;
+    margin: 0;
+    width: auto;
+  }
+  label {
+    display: inline-block;
+    width: auto;
+  }
+
+  button {
+    text-align: center;
+  }
+  button[type='submit'] {
+    margin-top: 5px;
+  }
+
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .apiKey {
+    font-family: Consolas, monospace;
+  }
+}

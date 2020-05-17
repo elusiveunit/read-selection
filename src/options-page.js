@@ -76,7 +76,7 @@ async function renderOptions() {
           ...selectOptions,
         ),
       ),
-      description ? description() : null,
+      description ? el('div', description()) : null,
     );
     fields.push(field);
   }
