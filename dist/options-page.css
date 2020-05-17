@@ -1,0 +1,24 @@
+body {
+  padding: 5px;
+}
+
+input,
+select {
+  display: block;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+button[type='submit'] {
+  margin-top: 5px;
+}
+
+.error {
+  color: red;
+}
+
+form .apiKey {
+  font-family: Consolas, monospace;
+}
