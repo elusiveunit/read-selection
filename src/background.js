@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 
-import { getApiKey, getVoice } from './options';
-import { httpPostJSON, runCodeInActiveTab } from './util';
+import { getApiKey, getVoice } from './lib/options';
+import { httpPostJSON, userAlert } from './lib/util';
 
 async function onReadSelection({ selectionText }) {
   // Strip line breaks and trailing periods.
@@ -44,8 +44,7 @@ async function onReadSelection({ selectionText }) {
       err.message.includes('403 Forbidden')
         ? "Request failed, it seems the API key isn't accepted."
         : err.message;
-    runCodeInActiveTab(`alert('TTS failed: ${msg}')`);
-    console.error('TTS failed', err);
+    userAlert(`TTS failed: ${msg}`, err);
   }
 }
 

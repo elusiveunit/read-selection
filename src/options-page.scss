@@ -1,6 +1,6 @@
 @import '~webext-base-css/webext-base';
 
-// Bump specificity for easier overriding
+// High specificity for easier overriding
 #opt {
   padding-top: 10px;
 

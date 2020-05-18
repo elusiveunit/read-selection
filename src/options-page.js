@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 
-import { classNames, el } from './util';
-import { OPTION_DATA, getSavedOptions } from './options';
+import { OPTION_DATA, getSavedOptions } from './lib/options';
+import { classNames, el } from './lib/util';
 
 import './options-page.scss';
 

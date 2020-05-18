@@ -97,6 +97,19 @@ export async function runFunctionInActiveTab(fn) {
   return runCodeInActiveTab(`${fnText};${fnName}();`);
 }
 
+/**
+ * Show an alert to the user.
+ *
+ * @param {string} msg - Message to display in the alert.
+ * @param {...*} [loggedErrors] - Extra data to log to the console.
+ */
+export async function userAlert(msg, ...loggedErrors) {
+  runCodeInActiveTab(`alert('${msg.replace(/([^\\])'/g, "$1\\'")}');`);
+  if (loggedErrors.length) {
+    console.error(...loggedErrors);
+  }
+}
+
 const JSON_MIME_TYPE = 'application/json';
 
 /**
@@ -124,7 +137,7 @@ async function _fetch(url, method, extraHeaders = {}, body) {
 
   if (!response.ok) {
     console.error('Fetch response', response);
-    throw new Error(`Got response ${response.status} ${response.statusText}`);
+    throw new Error(`${response.status} ${response.statusText}`);
   }
 
   return responseContentType.includes(JSON_MIME_TYPE)
