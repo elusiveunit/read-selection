@@ -3,6 +3,8 @@ import browser from 'webextension-polyfill';
 import { classNames, el } from './util';
 import { OPTION_DATA, getSavedOptions } from './options';
 
+import './options-page.scss';
+
 const OPTIONS_FORM = document.querySelector('form');
 const LOADER_CLASS_NAME = 'loader';
 
