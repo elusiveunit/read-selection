@@ -1,5 +1,20 @@
 import browser from 'webextension-polyfill';
-import isPlainObject from 'lodash/isPlainObject';
+
+/**
+ * Check if a value is a plain object (an object literal or created with
+ * Object.create(null)).
+ *
+ * @param {*} val
+ * @returns {boolean}
+ */
+function isPlainObject(val) {
+  return Boolean(
+    val &&
+      typeof val === 'object' &&
+      Object.prototype.toString.call(val) === '[object Object]' &&
+      [Object.prototype, null].includes(Object.getPrototypeOf(val)),
+  );
+}
 
 /**
  * Get the currently selected text.
@@ -13,7 +28,9 @@ export function getSelectedText() {
 /**
  * Get class names.
  *
- * @returns {string}
+ * @param {...string|object} classes - Classes as is or objects where they key
+ *   is the class name to and the value's truthyness decides if it's included.
+ * @returns {string|null}
  */
 export function classNames(...classes) {
   let className = '';
@@ -44,13 +61,11 @@ export function classNames(...classes) {
  */
 export function el(tagName, ...attrChildren) {
   const elem = document.createElement(tagName);
-  const props = Array.from(attrChildren).filter((c) => !!c);
+  let props = Array.from(attrChildren).filter((c) => !!c);
   if (props.length === 0) {
     return elem;
   }
-  let sliceProps = 0;
   if (isPlainObject(props[0])) {
-    sliceProps = 1;
     Object.entries(props[0]).forEach(([attrName, attrVal]) => {
       if (attrVal != null) {
         elem.setAttribute(attrName, attrVal);
@@ -59,8 +74,9 @@ export function el(tagName, ...attrChildren) {
     if (props.length === 1) {
       return elem;
     }
+    props = props.slice(1);
   }
-  props.slice(sliceProps).forEach((child) => {
+  props.forEach((child) => {
     const childEl =
       typeof child === 'string' ? document.createTextNode(child) : child;
     elem.appendChild(childEl);
@@ -72,7 +88,7 @@ export function el(tagName, ...attrChildren) {
  * Run a code snippet in the currently active tab.
  *
  * @param {string} code - Code to run.
- * @return {*} Execution result.
+ * @return {Promise<*>} Execution result.
  */
 export async function runCodeInActiveTab(code) {
   const result = await browser.tabs.executeScript({
@@ -85,14 +101,18 @@ export async function runCodeInActiveTab(code) {
  * Run a function in the currently active tab.
  *
  * @param {Function} fn - Function to run.
- * @return {*} Function result.
+ * @return {Promise<*>} Function result.
  */
 export async function runFunctionInActiveTab(fn) {
   const fnText = String(fn);
   if (fnText.indexOf('function') !== 0) {
     throw new Error('Only handles `function` definitions');
   }
-  const fnName = fnText.match(/function ([^(]+)/)[1];
+  const match = fnText.match(/function ([^(]+)/);
+  if (!match || !match[1]) {
+    throw new Error('No function name found');
+  }
+  const fnName = match[1];
   // The function definition followed by execution by name.
   return runCodeInActiveTab(`${fnText};${fnName}();`);
 }
@@ -108,108 +128,4 @@ export async function userAlert(msg, ...loggedErrors) {
   if (loggedErrors.length) {
     console.error(...loggedErrors);
   }
-}
-
-const JSON_MIME_TYPE = 'application/json';
-
-/**
- * Wrapped fetch, used for helpers.
- *
- * @ignore
- * @param {string} url - URL to fetch.
- * @param {string} method - HTTP method (GET, POST...).
- * @param {object} [extraHeaders] - Any extra headers to add.
- * @param {string|Blob|FormData} [body] - Body, e.g. for POST requests.
- * @returns {Promise} Resolved with the response data.
- */
-async function _fetch(url, method, extraHeaders = {}, body) {
-  const params = {
-    method,
-    body,
-    credentials: 'same-origin',
-    headers: {
-      ...extraHeaders,
-    },
-  };
-
-  const response = await fetch(url, params);
-  const responseContentType = response.headers.get('Content-Type');
-
-  if (!response.ok) {
-    console.error('Fetch response', response);
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-
-  return responseContentType.includes(JSON_MIME_TYPE)
-    ? response.json()
-    : response.text();
-}
-
-/**
- * Wrapped fetch for JSON calls.
- *
- * @ignore
- * @see _fetch
- */
-async function _fetchJson(url, method, extraHeaders = {}, body) {
-  return _fetch(
-    url,
-    method,
-    {
-      'Accept': JSON_MIME_TYPE,
-      'Content-Type': JSON_MIME_TYPE,
-      ...extraHeaders,
-    },
-    typeof body === 'string' ? body : JSON.stringify(body),
-  );
-}
-
-/**
- * Run a GET request.
- *
- * @param {string} url - URL to get.
- * @param {object} [extraHeaders] - Any extra headers to send.
- * @returns {Promise} Resolved with the response data.
- */
-export function httpGet(url, extraHeaders = {}) {
-  return _fetch(url, 'GET', extraHeaders);
-}
-
-/**
- * Run a POST request.
- *
- * @param {string} url - URL to get.
- * @param {object} [extraHeaders] - Any extra headers to send.
- * @param {string|Blob|FormData} [body] - POST body.
- * @returns {Promise} Resolved with the response data.
- */
-export function httpPost(url, extraHeaders = {}, body) {
-  return _fetch(url, 'POST', extraHeaders, body);
-}
-
-/**
- * Run a GET request to fetch JSON.
- *
- * Just like a regular fetch but with `application/json` headers set.
- *
- * @param {string} url - URL to get.
- * @param {object} [extraHeaders] - Any extra headers to send.
- * @returns {Promise} Resolved with the JSON response.
- */
-export function httpGetJSON(url, extraHeaders = {}) {
-  return _fetchJson(url, 'GET', extraHeaders);
-}
-
-/**
- * Run a JSON POST request.
- *
- * Just like a regular fetch but with `application/json` headers set.
- *
- * @param {string} url - URL to get.
- * @param {object} [extraHeaders] - Any extra headers to send.
- * @param {string|Blob|FormData} [body] - POST body.
- * @returns {Promise} Resolved with the JSON response.
- */
-export function httpPostJSON(url, extraHeaders = {}, body) {
-  return _fetchJson(url, 'POST', extraHeaders, body);
 }

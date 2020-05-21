@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
 
-import { el, httpGetJSON } from './util';
+import { getAvailableVoices } from './api';
+import { el } from './util';
 
 /* eslint-disable no-use-before-define */
 
@@ -27,11 +28,9 @@ export const OPTION_DATA = [
       if (!apiKey) {
         return [];
       }
-      const voiceList = await httpGetJSON(
-        `https://texttospeech.googleapis.com/v1/voices?key=${apiKey}`,
-      );
+      const voices = await getAvailableVoices(apiKey);
       return [emptyOption].concat(
-        voiceList.voices
+        voices
           .sort((a, b) => a.name.localeCompare(b.name))
           .map(({ name, ssmlGender }) => ({
             value: name,

@@ -1,7 +1,8 @@
 import browser from 'webextension-polyfill';
 
+import { synthesizeText } from './lib/api';
 import { getApiKey, getVoice } from './lib/options';
-import { httpPostJSON, userAlert } from './lib/util';
+import { userAlert } from './lib/util';
 
 async function onReadSelection({ selectionText }) {
   // Strip line breaks and trailing periods.
@@ -17,26 +18,8 @@ async function onReadSelection({ selectionText }) {
       throw new Error('You must select a voice in the addon options.');
     }
 
-    const voiceParts = voice.split('-');
-    const tts = await httpPostJSON(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-      {},
-      {
-        input: {
-          text,
-        },
-        voice: {
-          name: voice,
-          languageCode: `${voiceParts[0]}-${voiceParts[1]}`,
-        },
-        audioConfig: {
-          audioEncoding: 'OGG_OPUS',
-        },
-      },
-    );
-    const audio = new Audio(
-      `data:audio/ogg;codecs=opus;base64,${tts.audioContent}`,
-    );
+    const audioData = await synthesizeText(apiKey, text, voice);
+    const audio = new Audio(`data:audio/ogg;codecs=opus;base64,${audioData}`);
     audio.play();
   } catch (err) {
     const msg =

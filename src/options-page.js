@@ -107,7 +107,7 @@ async function handleSubmit(e) {
 
   const data = {};
   Array.from(OPTIONS_FORM.elements)
-    .filter((field) => field.nodeName !== 'BUTTON')
+    .filter((field) => typeof field.value !== 'undefined')
     .forEach((field) => {
       data[field.name] = field.value;
     });
