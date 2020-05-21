@@ -67,8 +67,8 @@ export function el(tagName, ...attrChildren) {
   }
   if (isPlainObject(props[0])) {
     Object.entries(props[0]).forEach(([attrName, attrVal]) => {
-      if (attrVal != null) {
-        elem.setAttribute(attrName, attrVal);
+      if (attrVal != null && attrVal !== false) {
+        elem.setAttribute(attrName, attrVal === true ? '' : attrVal);
       }
     });
     if (props.length === 1) {
@@ -77,9 +77,13 @@ export function el(tagName, ...attrChildren) {
     props = props.slice(1);
   }
   props.forEach((child) => {
-    const childEl =
-      typeof child === 'string' ? document.createTextNode(child) : child;
-    elem.appendChild(childEl);
+    // Handle child being an array
+    const childEls = [].concat(
+      typeof child === 'string' ? document.createTextNode(child) : child,
+    );
+    childEls.forEach((c) => {
+      elem.appendChild(c);
+    });
   });
   return elem;
 }

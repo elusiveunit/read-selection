@@ -15,7 +15,7 @@ async function renderOptions() {
   /* eslint-disable no-await-in-loop */
 
   // Some fields can be async
-  const loader = el('div', { class: LOADER_CLASS_NAME }, 'Loading options...');
+  const loader = <div class={LOADER_CLASS_NAME}>Loading options...</div>;
   OPTIONS_FORM.prepend(loader);
 
   const values = await getSavedOptions();
@@ -38,16 +38,11 @@ async function renderOptions() {
     if (options) {
       try {
         const optionsData = await options();
-        selectOptions = optionsData.map((opt) =>
-          el(
-            'option',
-            {
-              value: opt.value,
-              selected: opt.value === values[name] ? true : null,
-            },
-            opt.label,
-          ),
-        );
+        selectOptions = optionsData.map((opt) => (
+          <option value={opt.value} selected={opt.value === values[name]}>
+            {opt.label}
+          </option>
+        ));
       } catch (err) {
         console.error(err);
         if (String(err).includes('400 Bad Request')) {
@@ -60,35 +55,32 @@ async function renderOptions() {
       }
     }
 
-    const field = el(
-      'div',
-      { class: 'field' },
-      el(
-        'label',
-        el('span', label),
-        el(
-          type || 'input',
-          {
-            ...attr,
-            type: type === 'input' ? attr.type || 'text' : null,
-            name,
-            class: classNames(name, attr.class),
-            value: values[name] || defaultValue || '',
-          },
-          ...selectOptions,
-        ),
-      ),
-      description ? el('div', description()) : null,
+    const ControlElement = type || 'input';
+    fields.push(
+      <div class="field">
+        <label>
+          <span>{label}</span>
+          <ControlElement
+            {...attr}
+            type={ControlElement === 'input' ? attr.type || 'text' : null}
+            name={name}
+            class={classNames(name, attr.class)}
+            value={values[name] || defaultValue || ''}
+          >
+            {selectOptions}
+          </ControlElement>
+        </label>
+        {Boolean(description) && <div>{description()}</div>}
+      </div>,
     );
-    fields.push(field);
   }
-  fields.push(el('button', { type: 'submit' }, 'Save'));
+  fields.push(<button type="submit">Save</button>);
 
   OPTIONS_FORM.textContent = '';
 
   if (has400Error) {
     OPTIONS_FORM.appendChild(
-      el('p', { class: 'error' }, `The supplied API key doesn't work.`),
+      <p class="error">The supplied API key doesn't work.</p>,
     );
   }
 
