@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack --watch",
-    "build": "cross-env NODE_ENV=production webpack",
-    "lint": "web-ext lint && eslint ."
+    "build": "cross-env NODE_ENV=production webpack && npm run sign",
+    "lint": "web-ext lint --self-hosted --source-dir dist && eslint .",
+    "sign": "env-cmd web-ext sign --source-dir dist"
   },
   "dependencies": {
     "lodash": "~4.17.19",
@@ -22,6 +23,7 @@
     "copy-webpack-plugin": "~6.0.3",
     "cross-env": "~7.0.2",
     "css-loader": "~4.2.1",
+    "env-cmd": "~10.1.0",
     "eslint": "~7.6.0",
     "eslint-config-airbnb-base": "~14.2.0",
     "eslint-config-prettier": "~6.11.0",
